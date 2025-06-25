@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/hooks/use-theme";
 import { Navbar } from "@/components/navbar";
 import Home from "@/pages/home";
 import PostDetail from "@/pages/post-detail";
@@ -11,7 +12,7 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <Navbar />
       <Switch>
         <Route path="/" component={Home} />
@@ -22,7 +23,7 @@ function Router() {
       </Switch>
       
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-300 py-12 mt-16">
+      <footer className="bg-slate-900 dark:bg-slate-950 text-slate-300 py-12 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -66,7 +67,7 @@ function Router() {
               </div>
             </div>
           </div>
-          <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
+          <div className="border-t border-slate-800 dark:border-slate-700 mt-8 pt-8 text-center text-slate-400">
             <p>&copy; 2024 BlogCraft. Built with React, Express, and TypeScript.</p>
           </div>
         </div>
@@ -78,10 +79,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <ThemeProvider defaultTheme="light" storageKey="blogcraft-ui-theme">
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

@@ -4,10 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BlockRenderer } from "@/components/block-renderer";
+import { CommentSystem } from "@/components/comment-system";
+import { SEOHead } from "@/components/seo-head";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Post, ParsedBlock } from "@shared/schema";
 import { formatDate, calculateReadTime } from "@/lib/utils";
+import { getSnippet } from "@/lib/block-parser";
 import { ChevronLeft, Heart, Bookmark, Share2, Eye } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
 
 interface PostWithBlocks extends Post {
   blocks: ParsedBlock[];
@@ -16,11 +21,34 @@ interface PostWithBlocks extends Post {
 export default function PostDetail() {
   const [, params] = useRoute("/posts/:slug");
   const slug = params?.slug;
+  const { toast } = useToast();
 
   const { data: post, isLoading, error } = useQuery<PostWithBlocks>({
     queryKey: [`/api/posts/slug/${slug}`],
     enabled: !!slug,
   });
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast({
+      title: "Link copied!",
+      description: "Post link has been copied to clipboard.",
+    });
+  };
+
+  const handleBookmark = () => {
+    toast({
+      title: "Bookmarked!",
+      description: "Post has been saved to your bookmarks.",
+    });
+  };
+
+  const handleLike = () => {
+    toast({
+      title: "Liked!",
+      description: "Thanks for your support!",
+    });
+  };
 
   if (error) {
     return (
@@ -63,11 +91,24 @@ export default function PostDetail() {
   }
 
   const readTime = calculateReadTime(post.content);
+  const snippet = getSnippet(post.content, 160);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+    >
+      <SEOHead
+        title={post.title}
+        description={snippet}
+        image={post.coverImage || undefined}
+        url={window.location.href}
+        type="article"
+      />
       {/* Breadcrumb */}
-      <nav className="flex items-center space-x-2 text-sm text-slate-600 mb-8">
+      <nav className="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-400 mb-8">
         <Link href="/">
           <Button variant="ghost" className="hover:text-primary">
             <ChevronLeft className="w-4 h-4 mr-2" />
@@ -116,14 +157,14 @@ export default function PostDetail() {
             </div>
             <span>•</span>
             <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="sm" className="hover:text-primary">
+              <Button variant="ghost" size="sm" className="hover:text-primary" onClick={handleLike}>
                 <Heart className="w-4 h-4 mr-1" />
                 42
               </Button>
-              <Button variant="ghost" size="sm" className="hover:text-primary">
+              <Button variant="ghost" size="sm" className="hover:text-primary" onClick={handleBookmark}>
                 <Bookmark className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="hover:text-primary">
+              <Button variant="ghost" size="sm" className="hover:text-primary" onClick={handleShare}>
                 <Share2 className="w-4 h-4" />
               </Button>
             </div>
@@ -166,6 +207,9 @@ export default function PostDetail() {
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Comment System */}
+      <CommentSystem postId={post.id} />
+    </motion.div>
   );
 }

@@ -1,5 +1,6 @@
 import { ParsedBlock } from "@shared/schema";
 import { ProductBlock } from "./product-block";
+import { marked } from "marked";
 
 interface BlockRendererProps {
   blocks: ParsedBlock[];
@@ -50,13 +51,26 @@ export function BlockRenderer({ blocks, content }: BlockRendererProps) {
 }
 
 function formatContent(content: string): string {
-  // Basic markdown-like formatting
-  return content
-    .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold text-slate-900 mt-8 mb-4">$1</h2>')
-    .replace(/^### (.*$)/gim, '<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">$1</h3>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/\n\n/g, '</p><p class="mb-6">')
-    .replace(/^(?!<)(.+)$/gm, '<p class="mb-6">$1</p>')
-    .replace(/<p class="mb-6"><\/p>/g, '');
+  // Configure marked for better HTML output
+  marked.setOptions({
+    breaks: true,
+    gfm: true,
+  });
+
+  // Parse markdown to HTML
+  const htmlContent = marked(content);
+  
+  // Add custom classes to the generated HTML
+  return htmlContent
+    .replace(/<h2>/g, '<h2 class="text-2xl font-bold text-slate-900 dark:text-white mt-8 mb-4">')
+    .replace(/<h3>/g, '<h3 class="text-xl font-semibold text-slate-900 dark:text-white mt-6 mb-3">')
+    .replace(/<h4>/g, '<h4 class="text-lg font-semibold text-slate-900 dark:text-white mt-4 mb-2">')
+    .replace(/<p>/g, '<p class="mb-6 text-slate-700 dark:text-slate-300">')
+    .replace(/<strong>/g, '<strong class="font-semibold text-slate-900 dark:text-white">')
+    .replace(/<code>/g, '<code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-sm font-mono">')
+    .replace(/<pre>/g, '<pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto my-6">')
+    .replace(/<blockquote>/g, '<blockquote class="border-l-4 border-primary pl-4 italic text-slate-600 dark:text-slate-400 my-6">')
+    .replace(/<ul>/g, '<ul class="list-disc list-inside mb-6 text-slate-700 dark:text-slate-300">')
+    .replace(/<ol>/g, '<ol class="list-decimal list-inside mb-6 text-slate-700 dark:text-slate-300">')
+    .replace(/<li>/g, '<li class="mb-2">');
 }

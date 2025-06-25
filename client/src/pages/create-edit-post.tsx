@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
@@ -9,10 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SEOHead } from "@/components/seo-head";
 import { useToast } from "@/hooks/use-toast";
 import { insertPostSchema, type InsertPost, type Post } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { ArrowLeft, Save, Send, Eye, Upload, Package } from "lucide-react";
+import { motion } from "framer-motion";
 
 const categories = [
   { value: "technology", label: "Technology" },
@@ -49,7 +51,7 @@ export default function CreateEditPost() {
   });
 
   // Update form values when post data loads
-  useState(() => {
+  useEffect(() => {
     if (post && isEditing) {
       form.reset({
         title: post.title,
@@ -60,7 +62,7 @@ export default function CreateEditPost() {
         tags: post.tags || [],
       });
     }
-  });
+  }, [post, isEditing, form]);
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertPost) => {
@@ -142,7 +144,17 @@ export default function CreateEditPost() {
   const watchedContent = form.watch("content");
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+    >
+      <SEOHead
+        title={isEditing ? `Edit: ${post?.title || 'Post'}` : 'Create New Post'}
+        description={isEditing ? 'Edit your blog post' : 'Create a new blog post with dynamic content blocks'}
+        type="website"
+      />
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -356,6 +368,6 @@ This will render a custom product display component in your post.`}
           </div>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 }

@@ -145,7 +145,7 @@ Implement dynamic imports and lazy loading to reduce initial bundle size.`,
 
   async getAllPosts(): Promise<Post[]> {
     return Array.from(this.posts.values()).sort((a, b) => 
-      new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime()
+      new Date(b.publishedDate || 0).getTime() - new Date(a.publishedDate || 0).getTime()
     );
   }
 
@@ -166,6 +166,9 @@ Implement dynamic imports and lazy loading to reduce initial bundle size.`,
       ...insertPost,
       id,
       slug,
+      coverImage: insertPost.coverImage || null,
+      category: insertPost.category || null,
+      tags: insertPost.tags || null,
       publishedDate: now,
       updatedDate: now,
     };
