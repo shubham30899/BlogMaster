@@ -1,4 +1,4 @@
-import { users, posts, type User, type InsertUser, type Post, type InsertPost, type UpdatePost } from "@shared/schema";
+import { users, posts, type User, type InsertUser, type Post, type InsertPost, type UpdatePost } from "./shared/schema";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -154,7 +154,7 @@ Implement dynamic imports and lazy loading to reduce initial bundle size.`,
   }
 
   async getPostBySlug(slug: string): Promise<Post | undefined> {
-    console.log("slug",slug,this.posts.values());
+    console.log("slug",slug);
     
     return Array.from(this.posts.values()).find(post => post.slug === slug);
   }
