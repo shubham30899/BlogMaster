@@ -60,7 +60,7 @@ app.use((req, res, next) => {
   if (app.get("env") === "production") {
     const nextStaticPath = path.join(__dirname, "../.next/static");
     app.use("/_next/static", express.static(nextStaticPath));
-    
+
     const publicPath = path.join(__dirname, "../public");
     app.use(express.static(publicPath));
   }
@@ -73,7 +73,7 @@ app.use((req, res, next) => {
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = 5000;
+  const port:any = process.env.PORT || 5000;
   server.listen(port, "0.0.0.0", () => {
     log(`Express API server running on port ${port}`);
     if (app.get("env") === "development") {
