@@ -16,7 +16,11 @@ export function SearchFilter({ posts, onFilteredPosts }: SearchFilterProps) {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const categories = [...new Set(posts.map(post => post.category).filter(Boolean))];
+  const categories = [...new Set(
+    posts
+      .map(post => post.category)
+      .filter((c): c is string => c !== null)
+  )];
   const allTags = [...new Set(posts.flatMap(post => post.tags || []))];
 
   const applyFilters = () => {
@@ -128,8 +132,8 @@ export function SearchFilter({ posts, onFilteredPosts }: SearchFilterProps) {
             {selectedTags.map((tag) => (
               <Badge key={tag} variant="secondary" className="flex items-center space-x-1">
                 <span>{tag}</span>
-                <X 
-                  className="w-3 h-3 cursor-pointer hover:text-red-500" 
+                <X
+                  className="w-3 h-3 cursor-pointer hover:text-red-500"
                   onClick={() => removeTag(tag)}
                 />
               </Badge>

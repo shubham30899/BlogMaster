@@ -50,7 +50,7 @@ export function BlockRenderer({ blocks, content }: BlockRendererProps) {
   );
 }
 
-function formatContent(content: string): string {
+export async function formatContent(content: string): Promise<string> {
   // Configure marked for better HTML output
   marked.setOptions({
     breaks: true,
@@ -58,7 +58,7 @@ function formatContent(content: string): string {
   });
 
   // Parse markdown to HTML
-  const htmlContent = marked(content);
+  const htmlContent = await marked(content);
   
   // Add custom classes to the generated HTML
   return htmlContent
