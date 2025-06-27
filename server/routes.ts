@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertPostSchema, updatePostSchema } from "@shared/schema";
-import { parseBlocks } from "../client/src/lib/block-parser";
+import { parseBlocks } from "../lib/block-parser";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/posts - Get all posts

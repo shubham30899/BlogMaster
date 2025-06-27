@@ -20,7 +20,7 @@ BlogCraft is a modern full-stack blogging platform built with TypeScript, featur
 - **Database ORM**: Drizzle ORM with PostgreSQL dialect
 - **Database Provider**: Neon Database (serverless PostgreSQL)
 - **API Design**: RESTful API with JSON responses
-- **Development**: Hot module replacement with Vite middleware integration
+- **Development**: Pure Express server without Vite dependencies
 
 ### Database Schema
 - **Users Table**: Basic user authentication (id, username, password)
@@ -130,6 +130,13 @@ BlogCraft is a modern full-stack blogging platform built with TypeScript, featur
   * ✅ Updated components for Next.js compatibility
   * ✅ TypeScript path configuration for @/ imports
   * ✅ Development scripts for concurrent backend/frontend
+- June 27, 2025: Removed all Vite dependencies:
+  * ✅ Eliminated Vite middleware from Express server
+  * ✅ Removed client directory and Vite configuration files
+  * ✅ Updated server to pure Express API without frontend bundling
+  * ✅ Fixed import paths for block-parser and shared utilities
+  * ✅ Created separate Tailwind/PostCSS config for Next.js
+  * ✅ Updated development workflow for Express API + Next.js frontend
 
 ## User Preferences
 
