@@ -91,9 +91,9 @@ export default function Home() {
                 Start Writing
               </Button>
             </Link>
-            <Button size="lg" variant="outline">
+            {/* <Button size="lg" variant="outline">
               Explore Posts
-            </Button>
+            </Button> */}
           </motion.div>
         </div>
       </motion.div>

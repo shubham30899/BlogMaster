@@ -21,19 +21,23 @@ interface PostWithBlocks extends Post {
 }
 
 export default function PostDetail() {
+
+  console.log("inside this page");
+
   const params = useParams();
   const { toast } = useToast();
   const slug = params.slug as string;
 
   const { data: post, isLoading } = useQuery<PostWithBlocks>({
-    queryKey: ["/api/posts", slug],
+    queryKey: [`/api/posts/slug/${slug}`],
     queryFn: async () => {
-      const res = await fetch(`/api/posts/${slug}`);
+      const res = await fetch(`/api/posts/slug/${slug}`, { cache: 'no-store' });
+
       if (!res.ok) throw new Error('Failed to fetch post');
       const data = await res.json();
       return {
-        ...data.post,
-        blocks: parseBlocks(data.post.content),
+        ...data,
+        blocks: parseBlocks(data.content),
       };
     },
     enabled: !!slug,
@@ -110,7 +114,7 @@ export default function PostDetail() {
   const readTime = calculateReadTime(post.content);
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
@@ -134,11 +138,11 @@ export default function PostDetail() {
             <Badge key={tag} variant="outline">{tag}</Badge>
           ))}
         </div>
-        
+
         <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-6 leading-tight">
           {post.title}
         </h1>
-        
+
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 dark:border-slate-700 pb-6">
           <div className="flex items-center space-x-4 mb-4 sm:mb-0">
             <Avatar className="w-12 h-12">
@@ -203,7 +207,7 @@ export default function PostDetail() {
               {post.author}
             </h3>
             <p className="text-slate-600 dark:text-slate-300 mb-4">
-              Passionate developer and technical writer sharing insights about modern web development, 
+              Passionate developer and technical writer sharing insights about modern web development,
               software architecture, and emerging technologies.
             </p>
             <Button variant="ghost" size="sm" className="text-primary hover:text-blue-700">

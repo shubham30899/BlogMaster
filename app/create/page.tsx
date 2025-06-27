@@ -41,7 +41,7 @@ export default function CreatePost() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to create post');
+      //if (!res.ok) throw new Error('Failed to create post');
       return res.json();
     },
     onSuccess: (data) => {

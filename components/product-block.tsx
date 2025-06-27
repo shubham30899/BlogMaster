@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ParsedBlock } from "@shared/schema";
-import { getProductsBySkus } from "../../../data/products";
 import { Package } from "lucide-react";
+import { getProductsBySkus } from "@/data/products";
 
 interface ProductBlockProps {
   block: ParsedBlock;

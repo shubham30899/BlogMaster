@@ -40,6 +40,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/posts/slug/:slug - Get post by slug
   app.get("/api/posts/slug/:slug", async (req, res) => {
     try {
+      console.log("inside");
+      
       const slug = req.params.slug;
       const post = await storage.getPostBySlug(slug);
       

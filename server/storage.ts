@@ -154,6 +154,8 @@ Implement dynamic imports and lazy loading to reduce initial bundle size.`,
   }
 
   async getPostBySlug(slug: string): Promise<Post | undefined> {
+    console.log("slug",slug,this.posts.values());
+    
     return Array.from(this.posts.values()).find(post => post.slug === slug);
   }
 

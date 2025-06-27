@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Search, Moon, Sun, Plus, FileText, Home, Edit } from "lucide-react";
 import Link from "next/link";
