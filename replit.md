@@ -7,12 +7,13 @@ BlogCraft is a modern full-stack blogging platform built with TypeScript, featur
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: React 18 with TypeScript
-- **Routing**: Wouter for lightweight client-side routing
+- **Framework**: Next.js 14+ with App Router and TypeScript
+- **Routing**: Next.js App Router with file-based routing
 - **State Management**: TanStack Query (React Query) for server state management
 - **UI Components**: Radix UI primitives with custom Tailwind CSS styling (shadcn/ui design system)
-- **Build Tool**: Vite for fast development and optimized builds
+- **Build Tool**: Next.js with Turbopack for fast development
 - **Styling**: Tailwind CSS with CSS variables for theming
+- **API Integration**: Proxy configuration to Express backend
 
 ### Backend Architecture
 - **Runtime**: Node.js 20 with Express.js server
@@ -86,15 +87,16 @@ BlogCraft is a modern full-stack blogging platform built with TypeScript, featur
 ## Deployment Strategy
 
 ### Development Environment
-- **Local Development**: `npm run dev` starts both server and client with HMR
+- **Local Development**: `npm run dev` starts Express backend (port 5000) + `next dev` for frontend (port 3000)
 - **Database**: Drizzle Kit for schema migrations (`npm run db:push`)
-- **Port Configuration**: Server runs on port 5000 with proxy setup
+- **Port Configuration**: Express backend on 5000, Next.js frontend on 3000 with API proxy
+- **API Proxy**: Next.js rewrites `/api/*` requests to Express backend
 
 ### Production Deployment
-- **Build Process**: Vite builds client assets, ESBuild bundles server
-- **Static Assets**: Client built to `dist/public` directory
+- **Build Process**: Next.js builds frontend assets, ESBuild bundles Express server
+- **Static Assets**: Next.js built to `.next` directory
 - **Server Bundle**: Express server bundled to `dist/index.js`
-- **Deployment Target**: Configured for autoscale deployment
+- **Deployment Target**: Configured for autoscale deployment with Next.js + Express
 - **Environment Variables**: DATABASE_URL required for PostgreSQL connection
 
 ### Replit Configuration
@@ -121,6 +123,13 @@ BlogCraft is a modern full-stack blogging platform built with TypeScript, featur
   * ✅ Markdown support with marked.js
   * ✅ Responsive design with Tailwind CSS
   * ✅ SEO-friendly slugs
+- June 27, 2025: Converted frontend to Next.js App Router:
+  * ✅ Next.js 14+ with App Router implementation
+  * ✅ File-based routing for /posts/[slug], /create, /edit/[id]
+  * ✅ API proxy configuration to Express backend
+  * ✅ Updated components for Next.js compatibility
+  * ✅ TypeScript path configuration for @/ imports
+  * ✅ Development scripts for concurrent backend/frontend
 
 ## User Preferences
 
