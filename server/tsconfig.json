@@ -14,6 +14,6 @@
     "emitDecoratorMetadata": true,
     "outDir": "dist"
   },
-  "include": ["**/*.ts"],
+  "include": ["server/**/*.ts"],
   "exclude": ["node_modules"]
 }
