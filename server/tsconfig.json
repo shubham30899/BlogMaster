@@ -10,7 +10,9 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "outDir": "dist"  // optional if compiling with tsc
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "outDir": "dist"
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules"]

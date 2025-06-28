@@ -1,0 +1,1 @@
+{"c":["app/layout","app/posts/[slug]/page","webpack"],"r":[],"m":["(app-pages-browser)/./components/block-renderer.tsx","(app-pages-browser)/./components/product-block.tsx","(app-pages-browser)/./data/products.ts","(app-pages-browser)/./node_modules/marked/lib/marked.esm.js"]}

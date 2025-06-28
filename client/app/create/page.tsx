@@ -16,11 +16,14 @@ import { insertPostSchema, type InsertPost } from "@/shared/schema";
 import { ArrowLeft, Save, Send, Eye, Upload, Package } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function CreatePost() {
   const router = useRouter();
   const { toast } = useToast();
   const [previewMode, setPreviewMode] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const form = useForm<InsertPost>({
     resolver: zodResolver(insertPostSchema),
@@ -49,9 +52,13 @@ export default function CreatePost() {
         title: "Success!",
         description: "Your post has been published.",
       });
-      router.push(`/posts/${data.post.slug}`);
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+
+      router.push(`/`);
     },
     onError: (error) => {
+      console.log("erro", error);
+
       toast({
         title: "Error",
         description: "Failed to create post. Please try again.",
@@ -68,7 +75,7 @@ export default function CreatePost() {
   const watchedContent = form.watch("content");
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}

@@ -43,6 +43,10 @@ export default function PostDetail() {
     enabled: !!slug,
   });
 
+
+  console.log("post data",post);
+  
+
   const handleLike = () => {
     toast({
       title: "Liked!",

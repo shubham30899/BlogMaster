@@ -1,6 +1,8 @@
+'use client'
 import { ParsedBlock } from "@/shared/schema";
 import { ProductBlock } from "./product-block";
 import { marked } from "marked";
+import { useEffect, useState } from "react";
 
 interface BlockRendererProps {
   blocks: ParsedBlock[];
@@ -8,9 +10,10 @@ interface BlockRendererProps {
 }
 
 export function BlockRenderer({ blocks, content }: BlockRendererProps) {
-  if (blocks.length === 0) {
-    return <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: formatContent(content) }} />;
-  }
+  
+  // if (blocks.length === 0) {
+  //   return <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: formatContent(content) }} />;
+  // }
 
   let processedContent = content;
   
@@ -37,13 +40,10 @@ export function BlockRenderer({ blocks, content }: BlockRendererProps) {
         
         if (part.trim()) {
           return (
-            <div 
-              key={`content-${index}`} 
-              dangerouslySetInnerHTML={{ __html: formatContent(part) }} 
-            />
+            <AsyncFormattedContent key={`content-${index}`} content={part} />
           );
         }
-        
+
         return null;
       })}
     </div>
@@ -74,3 +74,15 @@ export async function formatContent(content: string): Promise<string> {
     .replace(/<ol>/g, '<ol class="list-decimal list-inside mb-6 text-slate-700 dark:text-slate-300">')
     .replace(/<li>/g, '<li class="mb-2">');
 }
+
+
+function AsyncFormattedContent({ content }: { content: string }) {
+  const [html, setHtml] = useState("");
+
+  useEffect(() => {
+    formatContent(content).then(setHtml);
+  }, [content]);
+
+  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+}
+

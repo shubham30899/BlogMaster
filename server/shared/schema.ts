@@ -1,45 +1,31 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { User } from "../entity/user.entity";
+import { Post } from "../entity/post.entity";
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+// User schemas
+export const insertUserSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
 });
 
-export const posts = pgTable("posts", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  slug: text("slug").notNull().unique(),
-  author: text("author").notNull(),
-  content: text("content").notNull(),
-  coverImage: text("cover_image"),
-  category: text("category"),
-  tags: text("tags").array(),
-  publishedDate: timestamp("published_date").defaultNow(),
-  updatedDate: timestamp("updated_date").defaultNow(),
-});
-
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
-export const insertPostSchema = createInsertSchema(posts).omit({
-  id: true,
-  slug: true,
-  publishedDate: true,
-  updatedDate: true,
+// Post schemas
+export const insertPostSchema = z.object({
+  title: z.string().min(1),
+  author: z.string().min(1),
+  content: z.string().min(1),
+  coverImage: z.string().optional(),
+  category: z.string().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 export const updatePostSchema = insertPostSchema.partial();
 
+// Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export type UserType = Omit<User, '_id'>;
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type UpdatePost = z.infer<typeof updatePostSchema>;
-export type Post = typeof posts.$inferSelect;
+export type PostType = Omit<Post, '_id'>;
 
 // Block parsing types
 export interface ParsedBlock {

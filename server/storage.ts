@@ -1,37 +1,55 @@
-import { users, posts, type User, type InsertUser, type Post, type InsertPost, type UpdatePost } from "./shared/schema";
+import { Repository } from 'typeorm';
+import { AppDataSource } from './database.config';
+import { User } from './entity/user.entity';
+import { Post } from './entity/post.entity';
+import { InsertUser, UserType, InsertPost, UpdatePost, PostType } from './shared/schema';
 
 export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getUser(id: number): Promise<UserType | undefined>;
+  getUserByUsername(username: string): Promise<UserType | undefined>;
+  createUser(user: InsertUser): Promise<UserType>;
   
   // Blog post methods
-  getAllPosts(): Promise<Post[]>;
-  getPostById(id: number): Promise<Post | undefined>;
-  getPostBySlug(slug: string): Promise<Post | undefined>;
-  createPost(post: InsertPost): Promise<Post>;
-  updatePost(id: number, post: UpdatePost): Promise<Post | undefined>;
+  getAllPosts(): Promise<PostType[]>;
+  getPostById(id: number): Promise<PostType | undefined>;
+  getPostBySlug(slug: string): Promise<PostType | undefined>;
+  createPost(post: InsertPost): Promise<PostType>;
+  updatePost(id: number, post: UpdatePost): Promise<PostType | undefined>;
   deletePost(id: number): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private posts: Map<number, Post>;
-  private currentUserId: number;
-  private currentPostId: number;
+export class MongoStorage implements IStorage {
+  private userRepository: Repository<User>;
+  private postRepository: Repository<Post>;
+  private currentUserId: number = 1;
+  private currentPostId: number = 1;
+  private initialized: boolean = false;
 
   constructor() {
-    this.users = new Map();
-    this.posts = new Map();
-    this.currentUserId = 1;
-    this.currentPostId = 1;
-    
-    // Initialize with some sample posts
-    this.initializeSamplePosts();
+    this.userRepository = AppDataSource.getMongoRepository(User);
+    this.postRepository = AppDataSource.getMongoRepository(Post);
   }
 
-  private initializeSamplePosts() {
-    const samplePosts: Omit<Post, 'id'>[] = [
+  private async ensureInitialized() {
+    if (!this.initialized) {
+      await this.initializeSampleData();
+      this.initialized = true;
+    }
+  }
+
+  private async initializeSampleData() {
+    // Get the highest existing IDs to avoid conflicts
+    const existingPosts = await this.postRepository.find({
+      order: { id: 'DESC' },
+      take: 1
+    });
+    
+    if (existingPosts.length > 0) {
+      this.currentPostId = existingPosts[0].id + 1;
+      return; // Data already exists
+    }
+
+    const samplePosts: Omit<PostType, 'id'>[] = [
       {
         title: "Building Modern Web Applications with Next.js and TypeScript",
         slug: "building-modern-web-applications-nextjs-typescript",
@@ -62,7 +80,7 @@ Next.js and TypeScript make a powerful combination for building modern web appli
         coverImage: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
         category: "Technology",
         tags: ["nextjs", "typescript", "react", "web-development"],
-        publishedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+        publishedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
         updatedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       },
       {
@@ -85,7 +103,7 @@ Design tokens are the visual design atoms of the design system — specifically,
         coverImage: "https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
         category: "Design",
         tags: ["design-systems", "ui-ux", "components"],
-        publishedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
+        publishedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
         updatedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
       },
       {
@@ -108,15 +126,19 @@ Implement dynamic imports and lazy loading to reduce initial bundle size.`,
         coverImage: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
         category: "Programming",
         tags: ["react", "performance", "optimization"],
-        publishedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+        publishedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
         updatedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
       }
     ];
 
-    samplePosts.forEach(post => {
+    for (const postData of samplePosts) {
       const id = this.currentPostId++;
-      this.posts.set(id, { ...post, id });
-    });
+      const post = this.postRepository.create({
+        ...postData,
+        id,
+      });
+      await this.postRepository.save(post);
+    }
   }
 
   private generateSlug(title: string): string {
@@ -126,83 +148,122 @@ Implement dynamic imports and lazy loading to reduce initial bundle size.`,
       .replace(/(^-|-$)/g, '');
   }
 
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+  async getUser(id: number): Promise<UserType | undefined> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    return user ? this.convertUser(user) : undefined;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async getUserByUsername(username: string): Promise<UserType | undefined> {
+    const user = await this.userRepository.findOne({ where: { username } });
+    return user ? this.convertUser(user) : undefined;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async createUser(insertUser: InsertUser): Promise<UserType> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+    const user = this.userRepository.create({
+      ...insertUser,
+      id,
+    });
+    const savedUser = await this.userRepository.save(user);
+    return this.convertUser(savedUser);
   }
 
-  async getAllPosts(): Promise<Post[]> {
-    return Array.from(this.posts.values()).sort((a, b) => 
-      new Date(b.publishedDate || 0).getTime() - new Date(a.publishedDate || 0).getTime()
-    );
+  async getAllPosts(): Promise<PostType[]> {
+    await this.ensureInitialized();
+    const posts = await this.postRepository.find({
+      order: { publishedDate: 'DESC' }
+    });
+    return posts.map(post => this.convertPost(post));
   }
 
-  async getPostById(id: number): Promise<Post | undefined> {
-    return this.posts.get(id);
+  async getPostById(id: number): Promise<PostType | undefined> {
+    await this.ensureInitialized();
+    const post = await this.postRepository.findOne({ where: { id } });
+    return post ? this.convertPost(post) : undefined;
   }
 
-  async getPostBySlug(slug: string): Promise<Post | undefined> {
-    console.log("slug",slug);
+  async getPostBySlug(slug: string): Promise<PostType | undefined> {
+    await this.ensureInitialized();
+    console.log("slug", slug);
+    const post = await this.postRepository.findOne({ where: { slug } });
+    return post ? this.convertPost(post) : undefined;
+  }
+
+  // async createPost(insertPost: InsertPost): Promise<PostType> {
+  //   const id = this.currentPostId++;
+  //   const slug = this.generateSlug(insertPost.title);
+  //   const now = new Date();
     
-    return Array.from(this.posts.values()).find(post => post.slug === slug);
-  }
+  //   const post = this.postRepository.create({
+  //     ...insertPost,
+  //     id,
+  //     slug,
+  //     coverImage: insertPost.coverImage || undefined,
+  //     category: insertPost.category || undefined,
+  //     tags: insertPost.tags || undefined,
+  //     publishedDate: now,
+  //     updatedDate: now,
+  //   });
+    
+  //   const savedPost = await this.postRepository.save(post);
+  //   return this.convertPost(savedPost);
+  // }
 
-  async createPost(insertPost: InsertPost): Promise<Post> {
+   async createPost(insertPost: InsertPost): Promise<PostType> {
     const id = this.currentPostId++;
     const slug = this.generateSlug(insertPost.title);
     const now = new Date();
-    
-    const post: Post = {
+
+    const post = this.postRepository.create({
       ...insertPost,
       id,
       slug,
-      coverImage: insertPost.coverImage || null,
-      category: insertPost.category || null,
-      tags: insertPost.tags || null,
+      coverImage: insertPost.coverImage || undefined,
+      category: insertPost.category || undefined,
+      tags: insertPost.tags || undefined,
       publishedDate: now,
       updatedDate: now,
-    };
-    
-    this.posts.set(id, post);
-    return post;
+    });
+
+    const savedPost = await this.postRepository.save(post);
+    return this.convertPost(savedPost);
   }
 
-  async updatePost(id: number, updatePost: UpdatePost): Promise<Post | undefined> {
-    const existingPost = this.posts.get(id);
+  async updatePost(id: number, updatePost: UpdatePost): Promise<PostType | undefined> {
+    const existingPost = await this.postRepository.findOne({ where: { id } });
     if (!existingPost) {
       return undefined;
     }
 
-    const updatedPost: Post = {
-      ...existingPost,
+    const updatedData: any = {
       ...updatePost,
       updatedDate: new Date(),
     };
 
     // Update slug if title changed
     if (updatePost.title) {
-      updatedPost.slug = this.generateSlug(updatePost.title);
+      updatedData.slug = this.generateSlug(updatePost.title);
     }
 
-    this.posts.set(id, updatedPost);
-    return updatedPost;
+    await this.postRepository.update({ id }, updatedData);
+    const updatedPost = await this.postRepository.findOne({ where: { id } });
+    return updatedPost ? this.convertPost(updatedPost) : undefined;
   }
 
   async deletePost(id: number): Promise<boolean> {
-    return this.posts.delete(id);
+    const result = await this.postRepository.delete({ id });
+    return result.affected !== undefined && result.affected > 0;
+  }
+
+  private convertUser(user: User): UserType {
+    const { _id, ...userWithoutId } = user;
+    return userWithoutId;
+  }
+
+  private convertPost(post: Post): PostType {
+    const { _id, ...postWithoutId } = post;
+    return postWithoutId;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new MongoStorage();

@@ -20,9 +20,13 @@ export default function Home() {
     queryKey: ["/api/posts"],
     queryFn: async () => {
       const res = await fetch('/api/posts');
+      console.log("res", res);
+
       if (!res.ok) throw new Error('Failed to fetch posts');
       return res.json();
     },
+    refetchOnMount: true,         // <- always fetch again on mount
+
   });
 
   useEffect(() => {
@@ -57,14 +61,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Hero Section */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         className="bg-gradient-to-br from-primary/10 to-emerald-500/10 dark:from-primary/5 dark:to-emerald-500/5 py-16"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -72,7 +76,7 @@ export default function Home() {
           >
             Share Your <span className="text-primary">Stories</span>
           </motion.h1>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -80,7 +84,7 @@ export default function Home() {
           >
             A modern blogging platform with dynamic content blocks, perfect for developers and content creators
           </motion.p>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
@@ -121,15 +125,15 @@ export default function Home() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center space-x-2">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="icon"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(currentPage - 1)}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
-                
+
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   const pageNum = i + 1;
                   return (
@@ -143,7 +147,7 @@ export default function Home() {
                     </Button>
                   );
                 })}
-                
+
                 {totalPages > 5 && (
                   <>
                     <span className="px-3 py-2 text-slate-500">...</span>
@@ -152,9 +156,9 @@ export default function Home() {
                     </Button>
                   </>
                 )}
-                
-                <Button 
-                  variant="ghost" 
+
+                <Button
+                  variant="ghost"
                   size="icon"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(currentPage + 1)}
