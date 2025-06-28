@@ -11,7 +11,8 @@ export const AppDataSource = new DataSource({
   type: 'mongodb',
   url: process.env.MONGODB_URL,
   entities: [User, Post],
-  synchronize: true, // Set to false in production
+  synchronize: true,
+  ssl: true,
   logging: process.env.NODE_ENV === 'production',
 });
 
