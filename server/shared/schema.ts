@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { User } from "../entity/user.entity";
-import { Post } from "../entity/post.entity";
+import { User } from "../entity/user.entity.js";
+import { Post } from "../entity/post.entity.js";
 
 // User schemas
 export const insertUserSchema = z.object({

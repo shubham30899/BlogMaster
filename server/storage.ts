@@ -1,8 +1,8 @@
 import { Repository } from 'typeorm';
-import { AppDataSource } from './database.config';
-import { User } from './entity/user.entity';
-import { Post } from './entity/post.entity';
-import { InsertUser, UserType, InsertPost, UpdatePost, PostType } from './shared/schema';
+import { AppDataSource } from './database.config.js';
+import { User } from './entity/user.entity.js';
+import { Post } from './entity/post.entity.js';
+import { InsertUser, UserType, InsertPost, UpdatePost, PostType } from './shared/schema.js';
 
 export interface IStorage {
   getUser(id: number): Promise<UserType | undefined>;

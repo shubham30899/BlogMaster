@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { initializeDatabase } from "./database.config";
+import { registerRoutes } from "./routes.js";
+import { initializeDatabase } from "./database.config.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
